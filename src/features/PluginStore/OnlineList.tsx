@@ -1,13 +1,14 @@
 import { Icon, SearchBar } from '@lobehub/ui';
-import { Button, Empty } from 'antd';
-import { useResponsive } from 'antd-style';
+import { Empty } from 'antd';
 import isEqual from 'fast-deep-equal';
 import { ServerCrash } from 'lucide-react';
-import { memo, useState } from 'react';
+import { memo, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Center, Flexbox } from 'react-layout-kit';
+import { Virtuoso } from 'react-virtuoso';
 
 import AddPluginButton from '@/features/PluginStore/AddPluginButton';
+import { useServerConfigStore } from '@/store/serverConfig';
 import { useToolStore } from '@/store/tool';
 import { pluginSelectors, pluginStoreSelectors } from '@/store/tool/selectors';
 
@@ -17,26 +18,31 @@ import PluginItem from './PluginItem';
 export const OnlineList = memo(() => {
   const { t } = useTranslation('plugin');
   const [keywords, setKeywords] = useState<string>();
-  const { mobile } = useResponsive();
+  const mobile = useServerConfigStore((s) => s.isMobile);
   const pluginStoreList = useToolStore((s) => {
     const custom = pluginSelectors.installedCustomPluginMetaList(s);
     const store = pluginStoreSelectors.onlinePluginStore(s);
 
     return [...custom, ...store];
   }, isEqual);
-  const storePluginIds = useToolStore(
-    (s) => pluginStoreSelectors.onlinePluginStore(s).map((s) => s.identifier),
-    isEqual,
-  );
 
-  const [useFetchPluginList, installPlugins] = useToolStore((s) => [
-    s.useFetchPluginStore,
-    s.installPlugins,
-  ]);
+  const useFetchPluginList = useToolStore((s) => s.useFetchPluginStore);
 
   const { isLoading, error } = useFetchPluginList();
 
   const isEmpty = pluginStoreList.length === 0;
+
+  const filteredPluginList = useMemo(
+    () =>
+      pluginStoreList.filter((item) =>
+        [item.meta?.title, item.meta?.description, item.author, ...(item.meta?.tags || [])]
+          .filter(Boolean)
+          .join('')
+          .toLowerCase()
+          .includes((keywords || '')?.toLowerCase()),
+      ),
+    [pluginStoreList, keywords],
+  );
 
   return (
     <>
@@ -51,15 +57,7 @@ export const OnlineList = memo(() => {
           />
         </Flexbox>
         <AddPluginButton />
-        <Button
-          onClick={() => {
-            installPlugins(storePluginIds);
-          }}
-        >
-          {t('store.installAllPlugins')}
-        </Button>
       </Flexbox>
-
       {isLoading ? (
         <Loading />
       ) : isEmpty ? (
@@ -74,19 +72,15 @@ export const OnlineList = memo(() => {
           )}
         </Center>
       ) : (
-        <Flexbox gap={24}>
-          {pluginStoreList
-            .filter((item) =>
-              [item.meta?.title, item.meta?.description, item.author, ...(item.meta?.tags || [])]
-                .filter(Boolean)
-                .join('')
-                .toLowerCase()
-                .includes((keywords || '')?.toLowerCase()),
-            )
-            .map((item) => (
-              <PluginItem key={item.identifier} {...item} />
-            ))}
-        </Flexbox>
+        <Virtuoso
+          itemContent={(index) => {
+            const item = filteredPluginList[index];
+            return <PluginItem key={item.identifier} {...item} />;
+          }}
+          overscan={400}
+          style={{ height: 500, marginInline: -16 }}
+          totalCount={filteredPluginList.length}
+        />
       )}
     </>
   );
