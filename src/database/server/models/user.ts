@@ -3,8 +3,8 @@ import { eq } from 'drizzle-orm';
 import { DeepPartial } from 'utility-types';
 
 import { serverDB } from '@/database/server/core/db';
-import { KeyVaultsGateKeeper } from '@/server/keyVaultsEncrypt';
-import { UserPreference } from '@/types/user';
+import { KeyVaultsGateKeeper } from '@/server/modules/KeyVaultsEncrypt';
+import { UserGuide, UserPreference } from '@/types/user';
 import { UserSettings } from '@/types/user/settings';
 import { merge } from '@/utils/merge';
 
@@ -19,6 +19,12 @@ export class UserNotFoundError extends TRPCError {
 
 export class UserModel {
   static createUser = async (params: NewUser) => {
+    // if user already exists, skip creation
+    if (params.id) {
+      const user = await serverDB.query.users.findFirst({ where: eq(users.id, params.id) });
+      if (!!user) return;
+    }
+
     const [user] = await serverDB
       .insert(users)
       .values({ ...params })
@@ -36,6 +42,10 @@ export class UserModel {
 
   static findById = async (id: string) => {
     return serverDB.query.users.findFirst({ where: eq(users.id, id) });
+  };
+
+  static findByEmail = async (email: string) => {
+    return serverDB.query.users.findFirst({ where: eq(users.email, email) });
   };
 
   getUserState = async (id: string) => {
@@ -139,6 +149,17 @@ export class UserModel {
     return serverDB
       .update(users)
       .set({ preference: merge(user.preference, value) })
+      .where(eq(users.id, id));
+  }
+
+  async updateGuide(id: string, value: Partial<UserGuide>) {
+    const user = await serverDB.query.users.findFirst({ where: eq(users.id, id) });
+    if (!user) return;
+
+    const prevPreference = (user.preference || {}) as UserPreference;
+    return serverDB
+      .update(users)
+      .set({ preference: { ...prevPreference, guide: merge(prevPreference.guide || {}, value) } })
       .where(eq(users.id, id));
   }
 }
