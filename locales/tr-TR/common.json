@@ -9,10 +9,12 @@
       "title": "{{name}}'i Denemek İçin Hoş Geldiniz"
     }
   },
-  "appInitializing": "Uygulama başlatılıyor, lütfen bekleyin...",
+  "appInitializing": "Uygulama başlatılıyor...",
   "autoGenerate": "Otomatik Oluştur",
   "autoGenerateTooltip": "Auto-generate agent description based on prompts",
   "autoGenerateTooltipDisabled": "Otomatik tamamlama işlevini kullanmadan önce ipucu kelimesini girin",
+  "back": "Geri",
+  "batchDelete": "Toplu Sil",
   "blog": "Ürün Blogu",
   "cancel": "İptal",
   "changelog": "Changelog",
@@ -31,6 +33,7 @@
   "defaultSession": "Varsayılan Asistan",
   "delete": "Sil",
   "document": "Belge",
+  "download": "İndir",
   "duplicate": "Kopya oluştur",
   "edit": "Düzenle",
   "export": "Dışa Aktar",
@@ -109,6 +112,7 @@
     "en": "İngilizce",
     "en-US": "İngilizce",
     "es-ES": "İspanyolca",
+    "fa-IR": "Farsça",
     "fi-FI": "Fince",
     "fr-FR": "Fransızca",
     "hi-IN": "Hintçe",
@@ -192,7 +196,8 @@
   },
   "tab": {
     "chat": "Chat",
-    "market": "Keşfet",
+    "discover": "Keşfet",
+    "files": "Dosyalar",
     "me": "ben",
     "setting": "Ayarlar"
   },

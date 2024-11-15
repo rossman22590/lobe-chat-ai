@@ -25,6 +25,11 @@ describe('parseModelString', () => {
     expect(result).toMatchSnapshot();
   });
 
+  it('empty string model', () => {
+    const result = parseModelString('gpt-4-1106-preview=gpt-4-turbo,,  ,\n  ，+claude-2');
+    expect(result).toMatchSnapshot();
+  });
+
   describe('extension capabilities', () => {
     it('with token', () => {
       const result = parseModelString('chatglm-6b=ChatGLM 6B<4096>');
@@ -266,25 +271,6 @@ describe('transformToChatModelCards', () => {
       defaultChatModels: OpenAIProviderCard.chatModels,
     });
 
-    expect(result).toEqual([
-      {
-        displayName: 'ChatGPT-4',
-        files: true,
-        functionCall: true,
-        enabled: true,
-        id: 'gpt-4-0125-preview',
-        tokens: 128000,
-      },
-      {
-        description: 'GPT-4 Turbo 视觉版 (240409)',
-        displayName: 'ChatGPT-4 Vision',
-        files: true,
-        functionCall: true,
-        enabled: true,
-        id: 'gpt-4-turbo-2024-04-09',
-        tokens: 128000,
-        vision: true,
-      },
-    ]);
+    expect(result).toMatchSnapshot();
   });
 });

@@ -21,10 +21,10 @@ module.exports = defineConfig({
     'nl-NL',
     'pl-PL',
     'vi-VN',
+    'fa-IR',
   ],
   temperature: 0,
   modelName: 'gpt-4o-mini',
-  splitToken: 2048,
   experimental: {
     jsonMode: true,
   },
